@@ -3155,7 +3155,9 @@ body.modal-open {
     margin: 2px 0;
     border-radius: 2px;
     background: currentColor;
-    transition: transform 180ms ease, opacity 180ms ease;
+    transition:
+      transform 180ms ease,
+      opacity 180ms ease;
   }
 
   .nav-toggle[aria-expanded="true"] .nav-toggle-bar:first-child {
@@ -3171,7 +3173,164 @@ body.modal-open {
   }
 }
 
-[hidden] { display: none !important; }
+[hidden] {
+  display: none !important;
+}
 
+/* ==========================================================
+   MANTRAWEST — MATCH CLIENT LOGIN WITH GET A QUOTE
+   ========================================================== */
 
+/* Keep both buttons together in the header */
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
 
+/* Give both buttons the same base styling and animation */
+.header-actions .header-cta,
+.header-actions .nav-portal-link {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.75rem 1.25rem;
+  margin: 0;
+
+  border: 1px solid transparent;
+  border-radius: 999px;
+
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.5s var(--spring),
+    box-shadow 0.45s var(--spring),
+    background 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+/* Client Login inherits the same amber appearance */
+.header-actions .nav-portal-link {
+  color: var(--abyss);
+  background: linear-gradient(
+    155deg,
+    #ffc868,
+    var(--amber) 45%,
+    var(--amber-600)
+  );
+
+  border-color: transparent;
+
+  box-shadow:
+    0 12px 26px -8px rgba(245, 165, 36, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -3px 8px rgba(32, 20, 10, 0.14);
+
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* Matching hover animation */
+.header-actions .header-cta:hover,
+.header-actions .nav-portal-link:hover {
+  transform: translateY(-4px) scale(1.045);
+
+  box-shadow:
+    0 18px 36px -10px rgba(245, 165, 36, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -3px 8px rgba(32, 20, 10, 0.16);
+}
+
+/* Matching click animation */
+.header-actions .header-cta:active,
+.header-actions .nav-portal-link:active {
+  transform: translateY(-1px) scale(0.95);
+  transition-duration: 0.18s;
+}
+
+/* Keyboard accessibility */
+.header-actions .header-cta:focus-visible,
+.header-actions .nav-portal-link:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 3px;
+}
+
+/* Keep both buttons aligned on desktop */
+@media (min-width: 1024px) {
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-actions {
+    margin-left: auto;
+  }
+}
+
+/* Tablet and mobile */
+@media (max-width: 1023px) {
+  .header-actions {
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  .header-actions .header-cta,
+  .header-actions .nav-portal-link {
+    min-height: 40px;
+    padding: 0 12px;
+    font-size: 0.78rem;
+  }
+}
+
+/* Smaller phones */
+@media (max-width: 560px) {
+  .header-actions {
+    gap: 5px;
+  }
+
+  .header-actions .header-cta,
+  .header-actions .nav-portal-link {
+    min-height: 36px;
+    padding: 0 8px;
+    font-size: 0.68rem;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 400px) {
+  .header-actions {
+    gap: 3px;
+  }
+
+  .header-actions .header-cta,
+  .header-actions .nav-portal-link {
+    min-height: 34px;
+    padding: 0 6px;
+    font-size: 0.62rem;
+  }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .header-actions .header-cta,
+  .header-actions .nav-portal-link {
+    transition: none !important;
+  }
+
+  .header-actions .header-cta:hover,
+  .header-actions .nav-portal-link:hover {
+    transform: none;
+  }
+}
