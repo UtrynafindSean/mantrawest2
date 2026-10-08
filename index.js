@@ -1,13 +1,13 @@
 // ============================================================
-// MANTRAWEST WEBSITE - MAIN JAVASCRIPT
+// MANTRAWEST WEBSITE — MAIN JAVASCRIPT
 // ============================================================
 
 document.addEventListener("DOMContentLoaded", () => {
     "use strict";
 
-    // ========================================================
+    // ==========================================================
     // HELPER FUNCTIONS
-    // ========================================================
+    // ==========================================================
 
     const $ = (selector, parent = document) => {
         return parent.querySelector(selector);
@@ -18,64 +18,74 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
 
-    // ========================================================
-    // MOBILE NAVIGATION MENU
-    // ========================================================
+    // ==========================================================
+    // MOBILE NAVIGATION
+    // ==========================================================
 
-    const menuBtn = document.getElementById("navToggle");
-    const navMenu = document.getElementById("mainNav");
-    const navBackdrop = document.getElementById("navBackdrop");
+    const menuBtn = $("#navToggle");
+    const navMenu = $("#mainNav");
+    const navBackdrop = $("#navBackdrop");
 
     function openMenu() {
-        if (!menuBtn || !navMenu) return;
+        if (!navMenu) return;
 
         navMenu.classList.add("is-open");
+
+        if (menuBtn) {
+            menuBtn.classList.add("is-open");
+            menuBtn.setAttribute("aria-expanded", "true");
+        }
 
         if (navBackdrop) {
             navBackdrop.classList.add("is-open");
         }
 
-        menuBtn.setAttribute("aria-expanded", "true");
-
         document.body.classList.add("menu-open");
     }
 
+
     function closeMenu() {
-        if (!menuBtn || !navMenu) return;
+        if (!navMenu) return;
 
         navMenu.classList.remove("is-open");
+
+        if (menuBtn) {
+            menuBtn.classList.remove("is-open");
+            menuBtn.setAttribute("aria-expanded", "false");
+        }
 
         if (navBackdrop) {
             navBackdrop.classList.remove("is-open");
         }
 
-        menuBtn.setAttribute("aria-expanded", "false");
-
         document.body.classList.remove("menu-open");
     }
 
-    if (menuBtn) {
-        menuBtn.setAttribute("aria-expanded", "false");
 
-        menuBtn.addEventListener("click", () => {
-            const menuIsOpen = navMenu?.classList.contains("is-open");
+    function toggleMenu() {
+        if (!navMenu) return;
 
-            if (menuIsOpen) {
-                closeMenu();
-            } else {
-                openMenu();
-            }
-        });
+        if (navMenu.classList.contains("is-open")) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
     }
+
+
+    if (menuBtn) {
+        menuBtn.addEventListener("click", toggleMenu);
+    }
+
 
     if (navBackdrop) {
         navBackdrop.addEventListener("click", closeMenu);
     }
 
 
-    // ========================================================
+    // ==========================================================
     // NAVIGATION LINKS / SMOOTH SCROLL
-    // ========================================================
+    // ==========================================================
 
     const navLinks = $$(".nav-link");
 
@@ -83,12 +93,13 @@ document.addEventListener("DOMContentLoaded", () => {
         link.addEventListener("click", (event) => {
             const href = link.getAttribute("href");
 
-            // Ignore links that are not internal anchors
-            if (!href || !href.startsWith("#")) {
+            // Ignore links that do not point to a section
+            if (!href || !href.startsWith("#") || href === "#") {
+                closeMenu();
                 return;
             }
 
-            const target = document.querySelector(href);
+            const target = $(href);
 
             if (!target) {
                 return;
@@ -96,17 +107,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
             event.preventDefault();
 
-            const header = document.querySelector(".site-header");
+            const header = $("header");
             const headerHeight = header ? header.offsetHeight : 0;
 
             const targetPosition =
                 target.getBoundingClientRect().top +
                 window.scrollY -
                 headerHeight -
-                10;
+                20;
 
             window.scrollTo({
-                top: Math.max(0, targetPosition),
+                top: Math.max(targetPosition, 0),
                 behavior: "smooth"
             });
 
@@ -115,182 +126,154 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
-    // ========================================================
+    // ==========================================================
     // ABOUT NAVIGATION
-    // ========================================================
+    // ==========================================================
 
-    const aboutLink = document.querySelector('[data-nav="about"]');
-    const aboutSection = document.getElementById("about-preview");
+    const aboutLink = $('[data-nav="about"]');
+    const aboutSection = $("#about-preview");
 
     if (aboutLink && aboutSection) {
-        const currentHref = aboutLink.getAttribute("href");
-
-        // Only change the link if it is currently empty
-        // or already intended to point to an internal section.
-        if (!currentHref || currentHref === "#") {
-            aboutLink.setAttribute("href", "#about-preview");
-        }
+        aboutLink.setAttribute("href", "#about-preview");
     }
 
 
-    // ========================================================
+    // ==========================================================
     // SCROLL PROGRESS BAR
-    // ========================================================
+    // ==========================================================
 
-    const scrollProgress = document.getElementById("scrollProgress");
+    const scrollProgress = $("#scrollProgress");
 
     function updateScrollProgress() {
         if (!scrollProgress) return;
 
-        const scrollTop = window.scrollY;
-
-        const totalHeight =
+        const documentHeight =
             document.documentElement.scrollHeight -
             window.innerHeight;
 
-        if (totalHeight <= 0) {
+        if (documentHeight <= 0) {
             scrollProgress.style.width = "0%";
             return;
         }
 
-        const percentage = (scrollTop / totalHeight) * 100;
+        const scrollPercentage =
+            (window.scrollY / documentHeight) * 100;
 
         scrollProgress.style.width =
-            `${Math.min(100, percentage)}%`;
+            `${Math.min(scrollPercentage, 100)}%`;
     }
 
-    window.addEventListener(
-        "scroll",
-        updateScrollProgress,
-        { passive: true }
-    );
+
+    window.addEventListener("scroll", updateScrollProgress, {
+        passive: true
+    });
 
     updateScrollProgress();
 
 
-    // ========================================================
+    // ==========================================================
     // SCROLL REVEAL ANIMATION
-    // ========================================================
+    // ==========================================================
 
     const revealElements = $$(".reveal");
 
     if ("IntersectionObserver" in window) {
-
         const revealObserver = new IntersectionObserver(
             (entries, observer) => {
-
                 entries.forEach((entry) => {
-
-                    if (!entry.isIntersecting) {
-                        return;
-                    }
+                    if (!entry.isIntersecting) return;
 
                     entry.target.classList.add("is-visible");
-
                     observer.unobserve(entry.target);
                 });
-
             },
             {
                 threshold: 0.12,
-                rootMargin: "0px 0px -40px 0px"
+                rootMargin: "0px 0px -50px 0px"
             }
         );
 
         revealElements.forEach((element) => {
             revealObserver.observe(element);
         });
-
     } else {
-
-        // Fallback for older browsers
         revealElements.forEach((element) => {
             element.classList.add("is-visible");
         });
     }
 
 
-    // ========================================================
-    // ACTIVE NAVIGATION ON SCROLL
-    // ========================================================
+    // ==========================================================
+    // ACTIVE NAVIGATION LINK
+    // ==========================================================
 
     const sections = $$("main section[id]");
 
     function updateActiveNavigation() {
-        if (!sections.length) return;
+        if (!sections.length || !navLinks.length) return;
 
-        const scrollPosition =
-            window.scrollY +
-            window.innerHeight * 0.3;
+        const scrollPosition = window.scrollY + 180;
 
-        let currentSectionId = "";
+        let currentSection = "";
 
         sections.forEach((section) => {
+            const sectionTop = section.offsetTop;
+            const sectionBottom =
+                sectionTop + section.offsetHeight;
 
-            if (scrollPosition >= section.offsetTop) {
-                currentSectionId = section.id;
+            if (
+                scrollPosition >= sectionTop &&
+                scrollPosition < sectionBottom
+            ) {
+                currentSection = section.id;
             }
-
         });
 
         navLinks.forEach((link) => {
-
             const href = link.getAttribute("href");
 
-            link.classList.remove("is-active");
+            link.classList.remove("active");
 
-            if (href === `#${currentSectionId}`) {
-                link.classList.add("is-active");
+            if (
+                currentSection &&
+                href === `#${currentSection}`
+            ) {
+                link.classList.add("active");
             }
-
         });
     }
 
-    window.addEventListener(
-        "scroll",
-        updateActiveNavigation,
-        { passive: true }
-    );
+
+    window.addEventListener("scroll", updateActiveNavigation, {
+        passive: true
+    });
 
     updateActiveNavigation();
 
 
-    // ========================================================
+    // ==========================================================
     // SERVICE REQUEST BUTTONS
-    // ========================================================
+    // ==========================================================
 
     const serviceButtons = $$("[data-service-request]");
-    const messageField = document.getElementById("message");
+    const messageField = $("#message");
 
     serviceButtons.forEach((button) => {
-
         button.addEventListener("click", () => {
-
             const service =
                 button.getAttribute("data-service-request");
 
-            if (!service || !messageField) {
-                return;
-            }
-
-            const readableService = service
-                .replace(/-/g, " ")
-                .replace(/\b\w/g, (letter) =>
-                    letter.toUpperCase()
-                );
+            if (!messageField || !service) return;
 
             messageField.value =
-                `I would like to enquire about: ${readableService}.`;
+                `I would like to enquire about: ${service}`;
 
-            // Scroll to contact form
-            const contactSection =
-                document.getElementById("contact");
+            messageField.focus();
+
+            const contactSection = $("#contact");
 
             if (contactSection) {
-
-                const header =
-                    document.querySelector(".site-header");
-
+                const header = $("header");
                 const headerHeight =
                     header ? header.offsetHeight : 0;
 
@@ -298,360 +281,268 @@ document.addEventListener("DOMContentLoaded", () => {
                     contactSection.getBoundingClientRect().top +
                     window.scrollY -
                     headerHeight -
-                    10;
+                    20;
 
                 window.scrollTo({
-                    top: Math.max(0, position),
+                    top: Math.max(position, 0),
                     behavior: "smooth"
                 });
             }
-
-            closeMenu();
         });
     });
 
 
-    // ========================================================
+    // ==========================================================
     // CONTACT FORM
-    // ========================================================
+    // ==========================================================
 
-    const contactForm =
-        document.getElementById("contactForm");
-
-    const formStatus =
-        document.getElementById("formStatus");
-
-    const contactSubmit =
-        document.getElementById("contactSubmit");
-
-
-    function showFormStatus(message, type = "success") {
-
-        if (!formStatus) return;
-
-        formStatus.textContent = message;
-
-        formStatus.classList.remove(
-            "success",
-            "error"
-        );
-
-        formStatus.classList.add(type);
-
-        formStatus.removeAttribute("hidden");
-    }
-
+    const contactForm = $("#contactForm");
+    const formStatus = $("#formStatus");
+    const contactSubmit = $("#contactSubmit");
 
     if (contactForm) {
-
         contactForm.addEventListener("submit", (event) => {
-
             event.preventDefault();
 
-            const formData =
-                new FormData(contactForm);
+            const nameField = $("#name", contactForm);
+            const emailField = $("#email", contactForm);
+            const messageFieldLocal = $("#message", contactForm);
 
             const name =
-                String(formData.get("name") || "")
-                    .trim();
+                nameField ? nameField.value.trim() : "";
 
             const email =
-                String(formData.get("email") || "")
-                    .trim();
+                emailField ? emailField.value.trim() : "";
 
             const message =
-                String(formData.get("message") || "")
-                    .trim();
+                messageFieldLocal
+                    ? messageFieldLocal.value.trim()
+                    : "";
 
 
-            // --------------------------------------------
-            // VALIDATE NAME
-            // --------------------------------------------
+            // --------------------------------------------------
+            // VALIDATION
+            // --------------------------------------------------
 
-            if (!name) {
+            if (!name || !email || !message) {
+                if (formStatus) {
+                    formStatus.textContent =
+                        "Please complete all required fields.";
 
-                showFormStatus(
-                    "Please enter your name.",
-                    "error"
-                );
-
-                return;
-            }
-
-
-            // --------------------------------------------
-            // VALIDATE EMAIL
-            // --------------------------------------------
-
-            if (!email) {
-
-                showFormStatus(
-                    "Please enter your email address.",
-                    "error"
-                );
+                    formStatus.className =
+                        "form-status error";
+                }
 
                 return;
             }
 
 
+            // Proper email validation
             const emailPattern =
-                /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
             if (!emailPattern.test(email)) {
+                if (formStatus) {
+                    formStatus.textContent =
+                        "Please enter a valid email address.";
 
-                showFormStatus(
-                    "Please enter a valid email address.",
-                    "error"
-                );
-
-                return;
-            }
-
-
-            // --------------------------------------------
-            // VALIDATE MESSAGE
-            // --------------------------------------------
-
-            if (!message) {
-
-                showFormStatus(
-                    "Please enter your enquiry.",
-                    "error"
-                );
+                    formStatus.className =
+                        "form-status error";
+                }
 
                 return;
             }
 
 
-            // --------------------------------------------
-            // TEMPORARY SUBMISSION STATE
-            // --------------------------------------------
+            // --------------------------------------------------
+            // SUBMIT BUTTON
+            // --------------------------------------------------
 
             if (contactSubmit) {
-
                 contactSubmit.disabled = true;
                 contactSubmit.textContent = "Sending...";
             }
 
 
-            /*
-             * IMPORTANT:
-             *
-             * This currently simulates a successful submission.
-             *
-             * For the live website, we will connect this
-             * form to a real email/form backend.
-             */
+            if (formStatus) {
+                formStatus.textContent = "";
+                formStatus.className = "form-status";
+            }
 
+
+            // --------------------------------------------------
+            // TEMPORARY SUBMISSION HANDLER
+            // --------------------------------------------------
+            // This confirms the form works on the frontend.
+            // A real email/form service will be connected next.
+            // --------------------------------------------------
 
             setTimeout(() => {
+                if (formStatus) {
+                    formStatus.textContent =
+                        "Thank you. Your enquiry has been received.";
 
-                showFormStatus(
-                    "Thank you. Your enquiry has been received. Our team will be in touch.",
-                    "success"
-                );
+                    formStatus.className =
+                        "form-status success";
+                }
 
                 contactForm.reset();
 
                 if (contactSubmit) {
-
                     contactSubmit.disabled = false;
-                    contactSubmit.textContent = "Send enquiry";
+                    contactSubmit.textContent = "Send Message";
                 }
-
-            }, 600);
+            }, 1000);
         });
     }
 
 
-    // ========================================================
-    // CLIENT PORTAL / LOGIN MODAL
-    // ========================================================
+    // ==========================================================
+    // CLIENT PORTAL MODAL
+    // ==========================================================
 
-    const portalModal =
-        document.getElementById("portalModal");
+    const portalModal = $("#portalModal");
+    const portalModalClose = $("#portalModalClose");
+    const portalModalBackdrop = $("#portalModalBackdrop");
 
-    const portalClose =
-        document.getElementById("portalModalClose");
-
-    const portalBackdrop =
-        document.getElementById("portalModalBackdrop");
-
-    const portalButtons =
-        $$("[data-open-modal]");
+    const openModalButtons = $$("[data-open-modal]");
 
 
     function openPortalModal() {
-
         if (!portalModal) return;
 
-        portalModal.hidden = false;
+        portalModal.classList.add("is-open");
 
-        requestAnimationFrame(() => {
-            portalModal.classList.add("is-open");
-        });
+        portalModal.removeAttribute("hidden");
 
         document.body.classList.add("modal-open");
+
+        if (portalModalClose) {
+            setTimeout(() => {
+                portalModalClose.focus();
+            }, 50);
+        }
     }
 
 
     function closePortalModal() {
-
         if (!portalModal) return;
 
         portalModal.classList.remove("is-open");
 
+        portalModal.setAttribute("hidden", "");
+
         document.body.classList.remove("modal-open");
-
-        setTimeout(() => {
-
-            portalModal.hidden = true;
-
-        }, 250);
     }
 
 
-    portalButtons.forEach((button) => {
-
-        button.addEventListener(
-            "click",
-            openPortalModal
-        );
-
+    openModalButtons.forEach((button) => {
+        button.addEventListener("click", (event) => {
+            event.preventDefault();
+            openPortalModal();
+        });
     });
 
 
-    if (portalClose) {
-
-        portalClose.addEventListener(
+    if (portalModalClose) {
+        portalModalClose.addEventListener(
             "click",
             closePortalModal
         );
-
     }
 
 
-    if (portalBackdrop) {
-
-        portalBackdrop.addEventListener(
+    if (portalModalBackdrop) {
+        portalModalBackdrop.addEventListener(
             "click",
             closePortalModal
         );
-
     }
 
 
-    // ========================================================
+    // ==========================================================
     // ESCAPE KEY
-    // ========================================================
+    // ==========================================================
 
     document.addEventListener("keydown", (event) => {
-
-        if (event.key !== "Escape") {
-            return;
-        }
+        if (event.key !== "Escape") return;
 
         closeMenu();
         closePortalModal();
-
     });
 
 
-    // ========================================================
-    // CLOSE MOBILE MENU WHEN WINDOW EXPANDS
-    // ========================================================
-
-    window.addEventListener("resize", () => {
-
-        if (window.innerWidth > 900) {
-            closeMenu();
-        }
-
-    });
-
-
-    // ========================================================
+    // ==========================================================
     // FOOTER YEAR
-    // ========================================================
+    // ==========================================================
 
-    $$("[data-year]").forEach((element) => {
+    const yearElements = $$("[data-year]");
+    const currentYear = new Date().getFullYear();
 
-        element.textContent =
-            new Date().getFullYear();
-
+    yearElements.forEach((element) => {
+        element.textContent = currentYear;
     });
 
 
-    // ========================================================
-    // 3D GLASS CARD EFFECT
-    // ========================================================
+    // ==========================================================
+    // GLASS / 3D CARD EFFECT
+    // ==========================================================
 
-    $$(".glass-shine").forEach((card) => {
+    const glassCards = $$(".glass-shine");
 
+    glassCards.forEach((card) => {
         card.addEventListener("mousemove", (event) => {
-
-            if (window.innerWidth <= 900) {
-                return;
-            }
-
-            const rect =
-                card.getBoundingClientRect();
+            const rect = card.getBoundingClientRect();
 
             const x =
-                event.clientX - rect.left;
+                ((event.clientX - rect.left) / rect.width) * 100;
 
             const y =
-                event.clientY - rect.top;
+                ((event.clientY - rect.top) / rect.height) * 100;
 
-
-            const rotateX =
-                ((y / rect.height) - 0.5) * -4;
-
-            const rotateY =
-                ((x / rect.width) - 0.5) * 4;
-
-
-            card.style.transform =
-                `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-
+            card.style.setProperty("--mouse-x", `${x}%`);
+            card.style.setProperty("--mouse-y", `${y}%`);
         });
 
 
         card.addEventListener("mouseleave", () => {
-
-            card.style.transform = "";
-
+            card.style.removeProperty("--mouse-x");
+            card.style.removeProperty("--mouse-y");
         });
-
     });
 
 
-    // ========================================================
-    // IMAGE ERROR DETECTION
-    // ========================================================
+    // ==========================================================
+    // IMAGE ERROR HANDLING
+    // ==========================================================
 
-    $$("img").forEach((image) => {
+    const images = $$("img");
 
+    images.forEach((image) => {
         image.addEventListener("error", () => {
-
-            console.warn(
-                "Mantrawest image could not be loaded:",
-                image.src
-            );
-
             image.classList.add("image-error");
 
+            console.warn(
+                `MantraWest image could not be loaded: ${image.src}`
+            );
         });
-
     });
 
 
-    // ========================================================
-    // INITIALIZATION MESSAGE
-    // ========================================================
+    // ==========================================================
+    // INITIAL PAGE STATE
+    // ==========================================================
+
+    if (portalModal) {
+        portalModal.setAttribute("hidden", "");
+    }
+
+
+    // ==========================================================
+    // PAGE READY
+    // ==========================================================
 
     console.log(
-        "Mantrawest website loaded successfully."
+        "MantraWest website JavaScript loaded successfully."
     );
-
 });
