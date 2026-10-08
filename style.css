@@ -2695,3 +2695,62 @@ select {
     animation: none !important;
   }
 }
+/* ==========================================================
+   FINAL MANTRAWEST NAV FIXES
+   ========================================================== */
+
+@media (min-width: 1024px) {
+  .nav-portal-link {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    margin-left: 1.5rem;
+    padding: 0.65rem 0.9rem;
+    color: #ffffff;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.25s ease;
+  }
+
+  .nav-portal-link:hover {
+    color: #071b2e;
+    background: var(--amber);
+    border-color: var(--amber);
+    transform: translateY(-1px);
+  }
+}
+
+@media (max-width: 1023px) {
+  .nav-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 14, 24, 0.55);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 155;
+    transition: 0.3s ease;
+  }
+
+  .nav-backdrop.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .main-nav.is-open {
+    transform: translateX(0);
+  }
+}
+
+body.menu-open {
+  overflow: hidden;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
