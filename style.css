@@ -2754,3 +2754,253 @@ body.menu-open {
 body.modal-open {
   overflow: hidden;
 }
+/* ==========================================================
+   MANTRAWEST ABOUT SECTION
+========================================================== */
+
+.about-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+  gap: 70px;
+  align-items: start;
+  margin-top: 55px;
+}
+
+.about-content {
+  max-width: 720px;
+}
+
+.about-kicker,
+.purpose-label {
+  display: inline-block;
+  margin-bottom: 14px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.about-content h3 {
+  margin: 0 0 24px;
+  max-width: 650px;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1.05;
+}
+
+.about-content p {
+  max-width: 680px;
+  margin: 0 0 18px;
+  line-height: 1.8;
+  color: var(--text-muted);
+}
+
+/* HIGHLIGHTS */
+
+.about-highlights {
+  display: grid;
+  gap: 18px;
+}
+
+.about-highlight {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 18px;
+  padding: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(12px);
+  transition:
+    transform 0.3s ease,
+    border-color 0.3s ease,
+    background 0.3s ease;
+}
+
+.about-highlight:hover {
+  transform: translateY(-5px);
+  border-color: rgba(224, 168, 76, 0.35);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.about-icon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: rgba(224, 168, 76, 0.1);
+  color: var(--amber);
+  font-size: 1.2rem;
+}
+
+.about-highlight h4 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+}
+
+.about-highlight p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.65;
+  font-size: 0.92rem;
+}
+
+/* MISSION / VISION */
+
+.about-purpose {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+  margin-top: 75px;
+}
+
+.purpose-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 55px 1fr;
+  gap: 22px;
+  padding: 35px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.055),
+    rgba(255, 255, 255, 0.018)
+  );
+}
+
+.purpose-number {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--amber);
+  letter-spacing: 0.08em;
+}
+
+.purpose-card h3 {
+  margin: 0 0 13px;
+  font-size: 1.55rem;
+  line-height: 1.2;
+}
+
+.purpose-card p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* ABOUT CTA */
+
+.about-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  margin-top: 60px;
+  padding: 35px;
+  border-radius: 22px;
+  background: linear-gradient(
+    135deg,
+    rgba(224, 168, 76, 0.12),
+    rgba(255, 255, 255, 0.035)
+  );
+  border: 1px solid rgba(224, 168, 76, 0.18);
+}
+
+.about-cta h3 {
+  margin: 8px 0 0;
+  font-size: clamp(1.5rem, 3vw, 2.3rem);
+}
+
+/* ==========================================================
+   HEADER ACTIONS
+========================================================== */
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.header-actions .header-cta {
+  margin: 0;
+}
+
+.header-actions .nav-portal-link {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.header-actions .nav-portal-link:hover {
+  background: var(--amber);
+  border-color: var(--amber);
+  color: #071b2e;
+}
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media (max-width: 900px) {
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 45px;
+  }
+
+  .about-purpose {
+    grid-template-columns: 1fr;
+    margin-top: 50px;
+  }
+
+  .about-cta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-actions {
+    gap: 8px;
+  }
+
+  .header-actions .header-cta,
+  .header-actions .nav-portal-link {
+    min-height: 40px;
+    padding: 0 13px;
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .about-highlight {
+    grid-template-columns: 1fr;
+  }
+
+  .purpose-card {
+    grid-template-columns: 1fr;
+    padding: 26px;
+  }
+
+  .about-cta {
+    padding: 27px;
+  }
+
+  .header-actions {
+    display: none;
+  }
+}
