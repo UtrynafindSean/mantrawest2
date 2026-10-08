@@ -1,568 +1,687 @@
+```javascript
 // ============================================================
 // MANTRAWEST WEBSITE — MAIN JAVASCRIPT
 // ============================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-  "use strict";
+    "use strict";
 
-  const $ = (selector, parent = document) =>
-    parent.querySelector(selector);
+    // ==========================================================
+    // HELPERS
+    // ==========================================================
 
-  const $$ = (selector, parent = document) =>
-    Array.from(parent.querySelectorAll(selector));
+    const $ = (selector, parent = document) =>
+        parent.querySelector(selector);
+
+    const $$ = (selector, parent = document) =>
+        Array.from(parent.querySelectorAll(selector));
 
 
-  // ==========================================================
-  // MOBILE MENU
-  // ==========================================================
+    // ==========================================================
+    // MOBILE MENU
+    // ==========================================================
 
-  const menuBtn = document.getElementById("navToggle");
-  const navMenu = document.getElementById("mainNav");
-  const navBackdrop = document.getElementById("navBackdrop");
+    const menuBtn = document.getElementById("navToggle");
+    const navMenu = document.getElementById("mainNav");
+    const navBackdrop = document.getElementById("navBackdrop");
 
-  function openMenu() {
-    if (!menuBtn || !navMenu) return;
+    function openMenu() {
+        if (!menuBtn || !navMenu) return;
 
-    navMenu.classList.add("is-open");
+        navMenu.classList.add("is-open");
+
+        if (navBackdrop) {
+            navBackdrop.classList.add("is-open");
+        }
+
+        menuBtn.setAttribute("aria-expanded", "true");
+        menuBtn.setAttribute("aria-label", "Close menu");
+
+        document.body.classList.add("menu-open");
+    }
+
+    function closeMenu() {
+        if (!menuBtn || !navMenu) return;
+
+        navMenu.classList.remove("is-open");
+
+        if (navBackdrop) {
+            navBackdrop.classList.remove("is-open");
+        }
+
+        menuBtn.setAttribute("aria-expanded", "false");
+        menuBtn.setAttribute("aria-label", "Open menu");
+
+        document.body.classList.remove("menu-open");
+    }
+
+    if (menuBtn) {
+        menuBtn.addEventListener("click", () => {
+            const isOpen =
+                navMenu &&
+                navMenu.classList.contains("is-open");
+
+            if (isOpen) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        });
+    }
 
     if (navBackdrop) {
-      navBackdrop.classList.add("is-open");
+        navBackdrop.addEventListener("click", closeMenu);
     }
 
-    menuBtn.setAttribute("aria-expanded", "true");
-    menuBtn.setAttribute("aria-label", "Close menu");
 
-    document.body.classList.add("menu-open");
-  }
+    // ==========================================================
+    // NAVIGATION LINKS
+    // ==========================================================
 
-  function closeMenu() {
-    if (!menuBtn || !navMenu) return;
+    $$(".nav-link").forEach((link) => {
+        link.addEventListener("click", (event) => {
+            const href = link.getAttribute("href");
 
-    navMenu.classList.remove("is-open");
-
-    if (navBackdrop) {
-      navBackdrop.classList.remove("is-open");
-    }
-
-    menuBtn.setAttribute("aria-expanded", "false");
-    menuBtn.setAttribute("aria-label", "Open menu");
-
-    document.body.classList.remove("menu-open");
-  }
-
-  if (menuBtn) {
-    menuBtn.addEventListener("click", () => {
-      const isOpen =
-        navMenu &&
-        navMenu.classList.contains("is-open");
-
-      if (isOpen) {
-        closeMenu();
-      } else {
-        openMenu();
-      }
-    });
-  }
-
-  if (navBackdrop) {
-    navBackdrop.addEventListener("click", closeMenu);
-  }
-
-
-  // ==========================================================
-  // NAVIGATION LINKS
-  // ==========================================================
-
-  $$(".nav-link").forEach((link) => {
-    link.addEventListener("click", (event) => {
-      const href = link.getAttribute("href");
-
-      if (!href || !href.startsWith("#")) {
-        return;
-      }
-
-      const target = document.querySelector(href);
-
-      if (!target) {
-        return;
-      }
-
-      event.preventDefault();
-
-      const header =
-        document.querySelector(".site-header");
-
-      const headerHeight = header
-        ? header.offsetHeight
-        : 0;
-
-      const position =
-        target.getBoundingClientRect().top +
-        window.scrollY -
-        headerHeight -
-        10;
-
-      window.scrollTo({
-        top: Math.max(0, position),
-        behavior: "smooth",
-      });
-
-      closeMenu();
-    });
-  });
-
-
-  // ==========================================================
-  // FIX ABOUT NAVIGATION
-  // ==========================================================
-
-  const aboutLink =
-    document.querySelector('[data-nav="about"]');
-
-  const aboutSection =
-    document.getElementById("about-preview");
-
-  if (aboutLink && aboutSection) {
-    aboutLink.setAttribute(
-      "href",
-      "#about-preview"
-    );
-  }
-
-
-  // ==========================================================
-  // SCROLL PROGRESS
-  // ==========================================================
-
-  const scrollProgress =
-    document.getElementById("scrollProgress");
-
-  function updateScrollProgress() {
-    if (!scrollProgress) return;
-
-    const scrollTop = window.scrollY;
-
-    const totalHeight =
-      document.documentElement.scrollHeight -
-      window.innerHeight;
-
-    if (totalHeight <= 0) {
-      scrollProgress.style.width = "0%";
-      return;
-    }
-
-    const percentage =
-      (scrollTop / totalHeight) * 100;
-
-    scrollProgress.style.width =
-      `${Math.min(100, percentage)}%`;
-  }
-
-  window.addEventListener(
-    "scroll",
-    updateScrollProgress,
-    { passive: true }
-  );
-
-  updateScrollProgress();
-
-
-  // ==========================================================
-  // SCROLL REVEAL
-  // ==========================================================
-
-  const revealElements =
-    $$(".reveal");
-
-  if ("IntersectionObserver" in window) {
-    const revealObserver =
-      new IntersectionObserver(
-        (entries, observer) => {
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting) {
-              return;
+            if (!href || !href.startsWith("#")) {
+                return;
             }
 
-            entry.target.classList.add(
-              "is-visible"
+            const target = document.querySelector(href);
+
+            if (!target) {
+                return;
+            }
+
+            event.preventDefault();
+
+            const header = document.querySelector(".site-header");
+
+            const headerHeight = header
+                ? header.offsetHeight
+                : 0;
+
+            const position =
+                target.getBoundingClientRect().top +
+                window.scrollY -
+                headerHeight -
+                10;
+
+            window.scrollTo({
+                top: Math.max(0, position),
+                behavior: "smooth"
+            });
+
+            closeMenu();
+        });
+    });
+
+
+    // ==========================================================
+    // ABOUT NAVIGATION
+    // ==========================================================
+
+    const aboutLink =
+        document.querySelector('[data-nav="about"]');
+
+    const aboutSection =
+        document.getElementById("about-preview");
+
+    if (aboutLink && aboutSection) {
+        aboutLink.setAttribute(
+            "href",
+            "#about-preview"
+        );
+    }
+
+
+    // ==========================================================
+    // SCROLL PROGRESS
+    // ==========================================================
+
+    const scrollProgress =
+        document.getElementById("scrollProgress");
+
+    function updateScrollProgress() {
+        if (!scrollProgress) return;
+
+        const scrollTop = window.scrollY;
+
+        const totalHeight =
+            document.documentElement.scrollHeight -
+            window.innerHeight;
+
+        if (totalHeight <= 0) {
+            scrollProgress.style.width = "0%";
+            return;
+        }
+
+        const percentage =
+            (scrollTop / totalHeight) * 100;
+
+        scrollProgress.style.width =
+            `${Math.min(100, percentage)}%`;
+    }
+
+    window.addEventListener(
+        "scroll",
+        updateScrollProgress,
+        { passive: true }
+    );
+
+    updateScrollProgress();
+
+
+    // ==========================================================
+    // SCROLL REVEAL
+    // ==========================================================
+
+    const revealElements =
+        $$(".reveal");
+
+    if ("IntersectionObserver" in window) {
+
+        const revealObserver =
+            new IntersectionObserver(
+                (entries, observer) => {
+
+                    entries.forEach((entry) => {
+
+                        if (!entry.isIntersecting) {
+                            return;
+                        }
+
+                        entry.target.classList.add(
+                            "is-visible"
+                        );
+
+                        observer.unobserve(entry.target);
+                    });
+                },
+                {
+                    threshold: 0.12,
+                    rootMargin: "0px 0px -40px 0px"
+                }
             );
 
-            observer.unobserve(entry.target);
-          });
-        },
-        {
-          threshold: 0.12,
-          rootMargin: "0px 0px -40px 0px",
-        }
-      );
+        revealElements.forEach((element) => {
+            revealObserver.observe(element);
+        });
 
-    revealElements.forEach((element) => {
-      revealObserver.observe(element);
-    });
-  } else {
-    revealElements.forEach((element) => {
-      element.classList.add("is-visible");
-    });
-  }
+    } else {
+
+        revealElements.forEach((element) => {
+            element.classList.add("is-visible");
+        });
+    }
 
 
-  // ==========================================================
-  // ACTIVE NAVIGATION
-  // ==========================================================
+    // ==========================================================
+    // ACTIVE NAVIGATION
+    // ==========================================================
 
-  const navLinks =
-    $$(".nav-link");
+    const navLinks =
+        $$(".nav-link");
 
-  const sections =
-    $$("main section[id]");
+    const sections =
+        $$("main section[id]");
 
-  function updateActiveNavigation() {
-    if (!sections.length) return;
+    function updateActiveNavigation() {
 
-    const position =
-      window.scrollY +
-      window.innerHeight * 0.3;
+        if (!sections.length) return;
 
-    let currentId = "";
+        const position =
+            window.scrollY +
+            window.innerHeight * 0.3;
 
-    sections.forEach((section) => {
-      if (position >= section.offsetTop) {
-        currentId = section.id;
-      }
-    });
+        let currentId = "";
 
-    navLinks.forEach((link) => {
-      const href =
-        link.getAttribute("href");
+        sections.forEach((section) => {
 
-      link.classList.remove("is-active");
+            if (position >= section.offsetTop) {
+                currentId = section.id;
+            }
+        });
 
-      if (href === `#${currentId}`) {
-        link.classList.add("is-active");
-      }
-    });
-  }
+        navLinks.forEach((link) => {
 
-  window.addEventListener(
-    "scroll",
-    updateActiveNavigation,
-    { passive: true }
-  );
+            const href =
+                link.getAttribute("href");
 
-  updateActiveNavigation();
+            link.classList.remove("is-active");
 
+            if (href === `#${currentId}`) {
+                link.classList.add("is-active");
+            }
+        });
+    }
 
-  // ==========================================================
-  // SERVICE REQUEST BUTTONS
-  // ==========================================================
-
-  const serviceButtons =
-    $$("[data-service-request]");
-
-  const messageField =
-    document.getElementById("message");
-
-  serviceButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const service =
-        button.getAttribute(
-          "data-service-request"
-        );
-
-      if (!service || !messageField) {
-        return;
-      }
-
-      const readable =
-        service
-          .replace(/-/g, " ")
-          .replace(/\b\w/g, (letter) =>
-            letter.toUpperCase()
-          );
-
-      messageField.value =
-        `I would like to enquire about: ${readable}.`;
-    });
-  });
-
-
-  // ==========================================================
-  // CONTACT FORM
-  // ==========================================================
-
-  const contactForm =
-    document.getElementById("contactForm");
-
-  const formStatus =
-    document.getElementById("formStatus");
-
-  const contactSubmit =
-    document.getElementById("contactSubmit");
-
-  function showFormStatus(
-    message,
-    type = "success"
-  ) {
-    if (!formStatus) return;
-
-    formStatus.textContent = message;
-
-    formStatus.classList.remove(
-      "success",
-      "error"
+    window.addEventListener(
+        "scroll",
+        updateActiveNavigation,
+        { passive: true }
     );
 
-    formStatus.classList.add(type);
-  }
+    updateActiveNavigation();
 
-  if (contactForm) {
-    contactForm.addEventListener(
-      "submit",
-      (event) => {
-        event.preventDefault();
 
-        const formData =
-          new FormData(contactForm);
+    // ==========================================================
+    // SERVICE REQUEST BUTTONS
+    // ==========================================================
 
-        const name =
-          String(
-            formData.get("name") || ""
-          ).trim();
+    const serviceButtons =
+        $$("[data-service-request]");
 
-        const email =
-          String(
-            formData.get("email") || ""
-          ).trim();
+    const messageField =
+        document.getElementById("message");
 
-        const message =
-          String(
-            formData.get("message") || ""
-          ).trim();
+    serviceButtons.forEach((button) => {
 
-        if (!name) {
-          showFormStatus(
-            "Please enter your name.",
+        button.addEventListener("click", () => {
+
+            const service =
+                button.getAttribute(
+                    "data-service-request"
+                );
+
+            if (!service || !messageField) {
+                return;
+            }
+
+            const readable =
+                service
+                    .replace(/-/g, " ")
+                    .replace(/\b\w/g, (letter) =>
+                        letter.toUpperCase()
+                    );
+
+            messageField.value =
+                `I would like to enquire about: ${readable}.`;
+
+            messageField.focus();
+        });
+    });
+
+
+    // ==========================================================
+    // CONTACT FORM
+    // ==========================================================
+
+    const contactForm =
+        document.getElementById("contactForm");
+
+    const formStatus =
+        document.getElementById("formStatus");
+
+    const contactSubmit =
+        document.getElementById("contactSubmit");
+
+
+    function showFormStatus(
+        message,
+        type = "success"
+    ) {
+
+        if (!formStatus) return;
+
+        formStatus.textContent = message;
+
+        formStatus.classList.remove(
+            "success",
             "error"
-          );
-          return;
-        }
+        );
 
-        if (!email) {
-          showFormStatus(
-            "Please enter your email address.",
-            "error"
-          );
-          return;
-        }
+        formStatus.classList.add(type);
+    }
 
-        const emailPattern =
-          /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (!emailPattern.test(email)) {
-          showFormStatus(
-            "Please enter a valid email address.",
-            "error"
-          );
-          return;
-        }
+    if (contactForm) {
 
-        if (!message) {
-          showFormStatus(
-            "Please tell us about your project.",
-            "error"
-          );
-          return;
-        }
+        contactForm.addEventListener(
+            "submit",
+            async (event) => {
 
-        if (contactSubmit) {
-          contactSubmit.disabled = true;
+                event.preventDefault();
 
-          contactSubmit.textContent =
-            "Sending...";
-        }
+                const formData =
+                    new FormData(contactForm);
+
+                const name =
+                    String(
+                        formData.get("name") || ""
+                    ).trim();
+
+                const email =
+                    String(
+                        formData.get("email") || ""
+                    ).trim();
+
+                const message =
+                    String(
+                        formData.get("message") || ""
+                    ).trim();
+
+
+                // NAME VALIDATION
+
+                if (!name) {
+
+                    showFormStatus(
+                        "Please enter your name.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                // EMAIL VALIDATION
+
+                if (!email) {
+
+                    showFormStatus(
+                        "Please enter your email address.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                const emailPattern =
+                    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+                if (!emailPattern.test(email)) {
+
+                    showFormStatus(
+                        "Please enter a valid email address.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                // MESSAGE VALIDATION
+
+                if (!message) {
+
+                    showFormStatus(
+                        "Please tell us about your project.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                // TEMPORARY SUBMISSION STATE
+                // Real email/API connection will be added next.
+
+                if (contactSubmit) {
+
+                    contactSubmit.disabled = true;
+
+                    contactSubmit.textContent =
+                        "Sending...";
+                }
+
+
+                try {
+
+                    /*
+                    ==================================================
+                    REAL FORM SUBMISSION WILL GO HERE.
+
+                    Example:
+
+                    const response = await fetch(
+                        "YOUR_FORM_ENDPOINT",
+                        {
+                            method: "POST",
+                            body: formData
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error("Submission failed");
+                    }
+
+                    ==================================================
+                    */
+
+
+                    // TEMPORARY SUCCESS FOR TESTING
+
+                    await new Promise((resolve) =>
+                        setTimeout(resolve, 600)
+                    );
+
+                    showFormStatus(
+                        "Thank you. Your enquiry has been received. Our team will be in touch.",
+                        "success"
+                    );
+
+                    contactForm.reset();
+
+                } catch (error) {
+
+                    console.error(
+                        "Contact form error:",
+                        error
+                    );
+
+                    showFormStatus(
+                        "Sorry, your enquiry could not be sent. Please try again.",
+                        "error"
+                    );
+
+                } finally {
+
+                    if (contactSubmit) {
+
+                        contactSubmit.disabled = false;
+
+                        contactSubmit.textContent =
+                            "Send enquiry";
+                    }
+                }
+            }
+        );
+    }
+
+
+    // ==========================================================
+    // CLIENT LOGIN / PORTAL MODAL
+    // ==========================================================
+
+    const portalModal =
+        document.getElementById("portalModal");
+
+    const portalClose =
+        document.getElementById(
+            "portalModalClose"
+        );
+
+    const portalBackdrop =
+        document.getElementById(
+            "portalModalBackdrop"
+        );
+
+    const portalButtons =
+        $$("[data-open-modal]");
+
+
+    function openPortalModal() {
+
+        if (!portalModal) return;
+
+        portalModal.hidden = false;
+
+        requestAnimationFrame(() => {
+
+            portalModal.classList.add(
+                "is-open"
+            );
+        });
+
+        document.body.classList.add(
+            "modal-open"
+        );
+    }
+
+
+    function closePortalModal() {
+
+        if (!portalModal) return;
+
+        portalModal.classList.remove(
+            "is-open"
+        );
+
+        document.body.classList.remove(
+            "modal-open"
+        );
 
         setTimeout(() => {
-          showFormStatus(
-            "Thank you. Your enquiry has been received. Our team will be in touch.",
-            "success"
-          );
 
-          contactForm.reset();
+            portalModal.hidden = true;
 
-          if (contactSubmit) {
-            contactSubmit.disabled = false;
-
-            contactSubmit.textContent =
-              "Send enquiry";
-          }
-        }, 600);
-      }
-    );
-  }
+        }, 250);
+    }
 
 
-  // ==========================================================
-  // CLIENT LOGIN / PORTAL MODAL
-  // ==========================================================
+    portalButtons.forEach((button) => {
 
-  const portalModal =
-    document.getElementById("portalModal");
-
-  const portalClose =
-    document.getElementById(
-      "portalModalClose"
-    );
-
-  const portalBackdrop =
-    document.getElementById(
-      "portalModalBackdrop"
-    );
-
-  const portalButtons =
-    $$("[data-open-modal]");
-
-  function openPortalModal() {
-    if (!portalModal) return;
-
-    portalModal.hidden = false;
-
-    requestAnimationFrame(() => {
-      portalModal.classList.add(
-        "is-open"
-      );
+        button.addEventListener(
+            "click",
+            openPortalModal
+        );
     });
 
-    document.body.classList.add(
-      "modal-open"
-    );
-  }
 
-  function closePortalModal() {
-    if (!portalModal) return;
+    if (portalClose) {
 
-    portalModal.classList.remove(
-      "is-open"
-    );
-
-    document.body.classList.remove(
-      "modal-open"
-    );
-
-    setTimeout(() => {
-      portalModal.hidden = true;
-    }, 250);
-  }
-
-  portalButtons.forEach((button) => {
-    button.addEventListener(
-      "click",
-      openPortalModal
-    );
-  });
-
-  if (portalClose) {
-    portalClose.addEventListener(
-      "click",
-      closePortalModal
-    );
-  }
-
-  if (portalBackdrop) {
-    portalBackdrop.addEventListener(
-      "click",
-      closePortalModal
-    );
-  }
-
-
-  // ==========================================================
-  // ESCAPE KEY
-  // ==========================================================
-
-  document.addEventListener(
-    "keydown",
-    (event) => {
-      if (event.key === "Escape") {
-        closeMenu();
-        closePortalModal();
-      }
+        portalClose.addEventListener(
+            "click",
+            closePortalModal
+        );
     }
-  );
 
 
-  // ==========================================================
-  // FOOTER YEAR
-  // ==========================================================
+    if (portalBackdrop) {
 
-  $$("[data-year]").forEach((element) => {
-    element.textContent =
-      new Date().getFullYear();
-  });
+        portalBackdrop.addEventListener(
+            "click",
+            closePortalModal
+        );
+    }
 
 
-  // ==========================================================
-  // 3D GLASS CARD EFFECT
-  // ==========================================================
+    // ==========================================================
+    // ESCAPE KEY
+    // ==========================================================
 
-  $$(".glass-shine").forEach((card) => {
-    card.addEventListener(
-      "mousemove",
-      (event) => {
-        if (window.innerWidth <= 900) {
-          return;
+    document.addEventListener(
+        "keydown",
+        (event) => {
+
+            if (event.key === "Escape") {
+
+                closeMenu();
+
+                closePortalModal();
+            }
         }
-
-        const rect =
-          card.getBoundingClientRect();
-
-        const x =
-          event.clientX - rect.left;
-
-        const y =
-          event.clientY - rect.top;
-
-        const rotateX =
-          ((y / rect.height) - 0.5) * -4;
-
-        const rotateY =
-          ((x / rect.width) - 0.5) * 4;
-
-        card.style.transform =
-          `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-      }
     );
 
-    card.addEventListener(
-      "mouseleave",
-      () => {
-        card.style.transform = "";
-      }
-    );
-  });
+
+    // ==========================================================
+    // FOOTER YEAR
+    // ==========================================================
+
+    $$("[data-year]").forEach((element) => {
+
+        element.textContent =
+            new Date().getFullYear();
+    });
 
 
-  // ==========================================================
-  // IMAGE ERROR DETECTION
-  // ==========================================================
+    // ==========================================================
+    // 3D GLASS CARD EFFECT
+    // ==========================================================
 
-  $$("img").forEach((image) => {
-    image.addEventListener(
-      "error",
-      () => {
-        console.warn(
-          "Mantrawest image could not be loaded:",
-          image.src
+    $$(".glass-shine").forEach((card) => {
+
+        card.addEventListener(
+            "mousemove",
+            (event) => {
+
+                if (window.innerWidth <= 900) {
+                    return;
+                }
+
+                const rect =
+                    card.getBoundingClientRect();
+
+                const x =
+                    event.clientX - rect.left;
+
+                const y =
+                    event.clientY - rect.top;
+
+                const rotateX =
+                    ((y / rect.height) - 0.5) * -4;
+
+                const rotateY =
+                    ((x / rect.width) - 0.5) * 4;
+
+                card.style.transform =
+                    `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            }
         );
 
-        image.classList.add(
-          "image-error"
+
+        card.addEventListener(
+            "mouseleave",
+            () => {
+
+                card.style.transform = "";
+            }
         );
-      }
+    });
+
+
+    // ==========================================================
+    // IMAGE ERROR DETECTION
+    // ==========================================================
+
+    $$("img").forEach((image) => {
+
+        image.addEventListener(
+            "error",
+            () => {
+
+                console.warn(
+                    "Mantrawest image could not be loaded:",
+                    image.src
+                );
+
+                image.classList.add(
+                    "image-error"
+                );
+            }
+        );
+    });
+
+
+    // ==========================================================
+    // WEBSITE LOADED
+    // ==========================================================
+
+    console.log(
+        "Mantrawest website loaded successfully."
     );
-  });
 
-
-  console.log(
-    "Mantrawest website loaded successfully."
-  );
 });
+```
