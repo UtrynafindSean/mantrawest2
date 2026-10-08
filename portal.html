@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#071B2E" />
+    <title>Get Started | Mantrawest Client Portal</title>
+    <meta
+      name="description"
+      content="Sign in to your Mantrawest client account or register for portal access."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      body.portal-page {
+        min-height: 100vh;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        background: var(--abyss, #071b2e);
+      }
+      .portal-top {
+        padding: 1.25rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .portal-top-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+      .portal-top img {
+        display: block;
+        width: auto;
+        height: 34px;
+        max-width: 180px;
+      }
+      .portal-back {
+        color: rgba(255, 255, 255, 0.82);
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .portal-main {
+        display: grid;
+        place-items: center;
+        padding: 4rem 1.25rem;
+      }
+      .portal-card {
+        width: min(100%, 560px);
+        padding: clamp(1.5rem, 5vw, 3.25rem);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(22px);
+        box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+        color: #fff;
+      }
+      .portal-eyebrow {
+        margin: 0 0 0.8rem;
+        color: var(--amber, #e0a84c);
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+      .portal-card h1 {
+        margin: 0 0 1rem;
+        font-family: var(--font-display, "Space Grotesk", sans-serif);
+        font-size: clamp(2rem, 6vw, 3.25rem);
+        line-height: 1.08;
+      }
+      .portal-description {
+        color: rgba(255, 255, 255, 0.72);
+        line-height: 1.75;
+        margin: 0 0 1.75rem;
+      }
+      .portal-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+      }
+      .portal-actions .btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 52px;
+        text-decoration: none;
+        text-align: center;
+      }
+      .portal-help {
+        margin: 1.5rem 0 0;
+        color: rgba(255, 255, 255, 0.68);
+        font-size: 0.92rem;
+        line-height: 1.7;
+      }
+      .portal-help a {
+        color: var(--amber, #e0a84c);
+        font-weight: 700;
+      }
+      .portal-footer {
+        padding: 1.25rem;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.82rem;
+      }
+      @media (max-width: 480px) {
+        .portal-actions {
+          grid-template-columns: 1fr;
+        }
+        .portal-top-inner {
+          align-items: flex-start;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+  </head>
+  <body class="portal-page">
+    <header class="portal-top">
+      <div class="container portal-top-inner">
+        <a href="index.html" aria-label="Mantrawest home">
+          <img
+            src="https://mantrawest.com/waste/frontpageAssets/images/logo/logo-02.png"
+            alt="Mantrawest logo"
+            width="150"
+            height="34"
+          />
+        </a>
+        <a class="portal-back" href="index.html">← Back to website</a>
+      </div>
+    </header>
+
+    <main class="portal-main">
+      <section class="portal-card glass-shine" aria-labelledby="portal-title">
+        <p class="portal-eyebrow">Mantrawest Client Portal</p>
+        <h1 id="portal-title">Good to have you here.</h1>
+        <p class="portal-description">
+          Choose how you want to continue. Existing clients can sign in to their
+          account, while new clients can register for portal access.
+        </p>
+        <div class="portal-actions">
+          <a
+            class="btn btn-outline-light"
+            href="https://mantrawest.com/waste/login"
+            >Client Login</a
+          >
+          <a class="btn btn-amber" href="https://mantrawest.com/waste/register"
+            >Create an Account</a
+          >
+        </div>
+        <p class="portal-help">
+          Need help getting access?
+          <a href="index.html#quote-form">Contact the Mantrawest team</a>.
+        </p>
+      </section>
+    </main>
+
+    <footer class="portal-footer">
+      © <span data-year></span> Mantrawest. All rights reserved.
+    </footer>
+    <script>
+      document.querySelector("[data-year]").textContent =
+        new Date().getFullYear();
+    </script>
+  </body>
+</html>
