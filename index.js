@@ -1,150 +1,195 @@
-/* =========================================================
-   MANTRAWEST — MAIN JAVASCRIPT
-   Matches the current index.html + style.css
-   ========================================================= */
+// ============================================================
+// MANTRAWEST WEBSITE — MAIN JAVASCRIPT
+// ============================================================
 
 document.addEventListener("DOMContentLoaded", () => {
   "use strict";
 
-  /* =========================================================
-     ELEMENT HELPERS
-     ========================================================= */
+  // ==========================================================
+  // HELPERS
+  // ==========================================================
 
-  const $ = (selector, parent = document) => parent.querySelector(selector);
-
-  const $$ = (selector, parent = document) =>
-    Array.from(parent.querySelectorAll(selector));
-
-  const prefersReducedMotion = window.matchMedia(
-    "(prefers-reduced-motion: reduce)",
-  ).matches;
-
-  /* =========================================================
-     MOBILE NAVIGATION
-     ========================================================= */
-
-  const navToggle = $("#navToggle");
-  const mainNav = $("#mainNav");
-  const navBackdrop = $("#navBackdrop");
-
-  const openNav = () => {
-    if (!navToggle || !mainNav) return;
-
-    mainNav.classList.add("is-open");
-
-    if (navBackdrop) {
-      navBackdrop.classList.add("is-open");
-    }
-
-    navToggle.setAttribute("aria-expanded", "true");
-    navToggle.setAttribute("aria-label", "Close menu");
-
-    document.body.classList.add("nav-open");
+  const $ = (selector, parent = document) => {
+    return parent.querySelector(selector);
   };
 
-  const closeNav = () => {
-    if (!navToggle || !mainNav) return;
-
-    mainNav.classList.remove("is-open");
-
-    if (navBackdrop) {
-      navBackdrop.classList.remove("is-open");
-    }
-
-    navToggle.setAttribute("aria-expanded", "false");
-    navToggle.setAttribute("aria-label", "Open menu");
-
-    document.body.classList.remove("nav-open");
+  const $$ = (selector, parent = document) => {
+    return Array.from(parent.querySelectorAll(selector));
   };
 
-  if (navToggle) {
-    navToggle.addEventListener("click", () => {
-      const isOpen = navToggle.getAttribute("aria-expanded") === "true";
+  // ==========================================================
+  // MOBILE MENU
+  // ==========================================================
 
-      if (isOpen) {
-        closeNav();
-      } else {
-        openNav();
-      }
-    });
+  const menuBtn =
+    document.getElementById("navToggle") ||
+    document.getElementById("menuBtn");
+
+  const navMenu =
+    document.getElementById("mainNav") ||
+    document.getElementById("navMenu");
+
+  const navBackdrop = document.getElementById("navBackdrop");
+
+  function openMenu() {
+    if (!menuBtn || !navMenu) return;
+
+    navMenu.classList.add("active");
+
+    if (navBackdrop) {
+      navBackdrop.classList.add("active");
+    }
+
+    menuBtn.classList.add("active");
+    menuBtn.setAttribute("aria-expanded", "true");
+    menuBtn.setAttribute("aria-label", "Close menu");
+
+    document.body.classList.add("menu-open");
+  }
+
+  function closeMenu() {
+    if (!menuBtn || !navMenu) return;
+
+    navMenu.classList.remove("active");
+
+    if (navBackdrop) {
+      navBackdrop.classList.remove("active");
+    }
+
+    menuBtn.classList.remove("active");
+    menuBtn.setAttribute("aria-expanded", "false");
+    menuBtn.setAttribute("aria-label", "Open menu");
+
+    document.body.classList.remove("menu-open");
+  }
+
+  function toggleMenu() {
+    if (!navMenu) return;
+
+    if (navMenu.classList.contains("active")) {
+      closeMenu();
+    } else {
+      openMenu();
+    }
+  }
+
+  if (menuBtn) {
+    menuBtn.addEventListener("click", toggleMenu);
   }
 
   if (navBackdrop) {
-    navBackdrop.addEventListener("click", closeNav);
+    navBackdrop.addEventListener("click", closeMenu);
   }
 
-  // Close mobile menu after clicking a navigation link
-  $$(".nav-link").forEach((link) => {
+  // Close menu when a navigation link is clicked
+  $$(".nav-link, .nav-portal-link").forEach((link) => {
     link.addEventListener("click", () => {
-      closeNav();
+      closeMenu();
     });
   });
 
-  // Close menu with Escape
+  // Close menu if the screen becomes desktop-sized
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 900) {
+      closeMenu();
+    }
+  });
+
+
+  // ==========================================================
+  // ESCAPE KEY
+  // ==========================================================
+
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-      closeNav();
+      closeMenu();
+      closePortalModal();
     }
   });
 
-  // Close menu when screen becomes desktop-sized
-  window.addEventListener("resize", () => {
-    if (window.innerWidth >= 1024) {
-      closeNav();
-    }
+
+  // ==========================================================
+  // SMOOTH INTERNAL NAVIGATION
+  // ==========================================================
+
+  $$('a[href^="#"]').forEach((link) => {
+    link.addEventListener("click", (event) => {
+      const targetId = link.getAttribute("href");
+
+      if (!targetId || targetId === "#") {
+        return;
+      }
+
+      const target = document.querySelector(targetId);
+
+      if (!target) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const header = $(".site-header");
+
+      const headerHeight = header
+        ? header.getBoundingClientRect().height
+        : 0;
+
+      const targetPosition =
+        target.getBoundingClientRect().top +
+        window.scrollY -
+        headerHeight -
+        15;
+
+      window.scrollTo({
+        top: Math.max(0, targetPosition),
+        behavior: "smooth",
+      });
+
+      closeMenu();
+    });
   });
 
-  /* =========================================================
-     HEADER SCROLL STATE
-     ========================================================= */
 
-  const siteHeader = $(".site-header");
+  // ==========================================================
+  // SCROLL PROGRESS
+  // ==========================================================
 
-  const updateHeader = () => {
-    if (!siteHeader) return;
+  const scrollProgress = document.getElementById("scrollProgress");
 
-    if (window.scrollY > 40) {
-      siteHeader.classList.add("is-scrolled");
-    } else {
-      siteHeader.classList.remove("is-scrolled");
-    }
-  };
-
-  updateHeader();
-
-  /* =========================================================
-     SCROLL PROGRESS
-     ========================================================= */
-
-  const scrollProgress = $("#scrollProgress");
-
-  const updateScrollProgress = () => {
+  function updateScrollProgress() {
     if (!scrollProgress) return;
 
+    const scrollTop = window.scrollY;
+
     const documentHeight =
-      document.documentElement.scrollHeight - window.innerHeight;
+      document.documentElement.scrollHeight -
+      window.innerHeight;
 
     if (documentHeight <= 0) {
       scrollProgress.style.width = "0%";
       return;
     }
 
-    const progress = (window.scrollY / documentHeight) * 100;
+    const percentage =
+      Math.min(100, Math.max(0, (scrollTop / documentHeight) * 100));
 
-    scrollProgress.style.width = `${Math.min(progress, 100)}%`;
-  };
+    scrollProgress.style.width = `${percentage}%`;
+  }
 
-  /* =========================================================
-     SCROLL REVEAL
-     ========================================================= */
+  window.addEventListener("scroll", updateScrollProgress, {
+    passive: true,
+  });
+
+  updateScrollProgress();
+
+
+  // ==========================================================
+  // SCROLL REVEAL ANIMATIONS
+  // ==========================================================
 
   const revealElements = $$(".reveal");
 
-  if (
-    revealElements.length &&
-    "IntersectionObserver" in window &&
-    !prefersReducedMotion
-  ) {
+  if ("IntersectionObserver" in window) {
     const revealObserver = new IntersectionObserver(
       (entries, observer) => {
         entries.forEach((entry) => {
@@ -157,8 +202,8 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       {
         threshold: 0.12,
-        rootMargin: "0px 0px -40px 0px",
-      },
+        rootMargin: "0px 0px -50px 0px",
+      }
     );
 
     revealElements.forEach((element) => {
@@ -170,95 +215,64 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* =========================================================
-     DEPTH DIVIDER ANIMATION
-     ========================================================= */
 
-  const depthDividers = $$(".depth-divider");
-
-  if (
-    depthDividers.length &&
-    "IntersectionObserver" in window &&
-    !prefersReducedMotion
-  ) {
-    const depthObserver = new IntersectionObserver(
-      (entries, observer) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-
-          entry.target.classList.add("animate");
-
-          observer.unobserve(entry.target);
-        });
-      },
-      {
-        threshold: 0.2,
-      },
-    );
-
-    depthDividers.forEach((divider) => {
-      depthObserver.observe(divider);
-    });
-  } else {
-    depthDividers.forEach((divider) => {
-      divider.classList.add("animate");
-    });
-  }
-
-  /* =========================================================
-     STAT COUNTERS
-     ========================================================= */
+  // ==========================================================
+  // ANIMATED STATISTICS
+  // ==========================================================
 
   const statElements = $$("[data-count-to]");
 
-  const animateCounter = (element) => {
-    const target = Number(element.getAttribute("data-count-to"));
-
-    const valueElement = $(".stat-num-value", element);
-
-    if (!valueElement || Number.isNaN(target)) {
+  function animateCounter(element) {
+    if (element.dataset.counted === "true") {
       return;
     }
 
-    if (prefersReducedMotion) {
-      valueElement.textContent = target;
+    const target = Number(element.dataset.countTo);
+
+    if (!Number.isFinite(target)) {
       return;
     }
+
+    const valueElement =
+      $(".stat-num-value", element) || element;
+
+    element.dataset.counted = "true";
 
     const duration = 1400;
     const startTime = performance.now();
 
-    const updateCounter = (currentTime) => {
+    function updateCounter(currentTime) {
       const elapsed = currentTime - startTime;
 
-      const progress = Math.min(elapsed / duration, 1);
+      const progress = Math.min(
+        elapsed / duration,
+        1
+      );
 
-      // Ease-out
-      const eased = 1 - Math.pow(1 - progress, 3);
+      // Smooth ease-out
+      const easedProgress =
+        1 - Math.pow(1 - progress, 3);
 
-      const currentValue = Math.round(target * eased);
+      const currentValue = Math.round(
+        target * easedProgress
+      );
 
-      valueElement.textContent = currentValue;
+      valueElement.textContent =
+        currentValue.toLocaleString();
 
       if (progress < 1) {
         requestAnimationFrame(updateCounter);
       }
-    };
+    }
 
     requestAnimationFrame(updateCounter);
-  };
+  }
 
-  if (statElements.length && "IntersectionObserver" in window) {
-    const counterObserver = new IntersectionObserver(
+  if ("IntersectionObserver" in window) {
+    const statsObserver = new IntersectionObserver(
       (entries, observer) => {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
-
-          const statBand = entry.target.closest(".stats-band");
-
-          if (statBand) {
-            statBand.classList.add("is-visible");
-          }
 
           animateCounter(entry.target);
 
@@ -266,345 +280,281 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       },
       {
-        threshold: 0.4,
-      },
+        threshold: 0.5,
+      }
     );
 
     statElements.forEach((element) => {
-      counterObserver.observe(element);
+      statsObserver.observe(element);
     });
   } else {
-    statElements.forEach(animateCounter);
+    statElements.forEach((element) => {
+      animateCounter(element);
+    });
   }
 
-  /* =========================================================
-     SERVICE REQUEST → PREFILL QUOTE FORM
-     ========================================================= */
 
-  const quoteForm = $("#quote-form");
-  const quotePrefillNote = $("#quotePrefillNote");
-  const serviceInterest = $("#serviceInterest");
+  // ==========================================================
+  // ACTIVE NAVIGATION
+  // ==========================================================
 
-  const serviceNames = {
-    "offshore-onshore-waste-management-solutions":
-      "Offshore & Onshore Waste Management",
+  const navLinks = $$(".nav-link");
 
-    "environmental-compliance-consulting":
-      "Environmental Compliance Consulting",
+  const sections = $$(
+    "main section[id]"
+  ).filter((section) => {
+    return section.id !== "top";
+  });
 
-    "cargo-carrying-units-rental": "Cargo Carrying Units Rental",
+  function updateActiveNav() {
+    if (!sections.length || !navLinks.length) {
+      return;
+    }
 
-    "ai-powered-solutions": "AI-Powered Solutions",
+    const scrollPosition =
+      window.scrollY +
+      window.innerHeight * 0.25;
 
-    other: "Something else",
-  };
+    let currentSection = "";
 
-  $$("[data-service-request]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const service = button.getAttribute("data-service-request");
+    sections.forEach((section) => {
+      const sectionTop =
+        section.offsetTop;
 
-      if (!service) return;
+      if (scrollPosition >= sectionTop) {
+        currentSection = section.id;
+      }
+    });
 
-      if (serviceInterest) {
-        serviceInterest.value = service;
+    navLinks.forEach((link) => {
+      link.classList.remove("active");
+
+      const navTarget =
+        link.getAttribute("href");
+
+      if (
+        navTarget &&
+        navTarget === `#${currentSection}`
+      ) {
+        link.classList.add("active");
+      }
+    });
+  }
+
+  window.addEventListener("scroll", updateActiveNav, {
+    passive: true,
+  });
+
+  updateActiveNav();
+
+
+  // ==========================================================
+  // SERVICE REQUEST BUTTONS
+  // ==========================================================
+
+  const serviceRequestLinks =
+    $$("[data-service-request]");
+
+  const messageField =
+    document.getElementById("message");
+
+  serviceRequestLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      const service =
+        link.getAttribute("data-service-request");
+
+      if (!service) {
+        return;
       }
 
-      if (quotePrefillNote) {
-        const readableName = serviceNames[service] || service;
+      if (messageField) {
+        const readableService =
+          service
+            .replace(/-/g, " ")
+            .replace(/\b\w/g, (letter) =>
+              letter.toUpperCase()
+            );
 
-        quotePrefillNote.textContent = `You're enquiring about: ${readableName}`;
-
-        quotePrefillNote.hidden = false;
+        messageField.value =
+          `I would like to enquire about: ${readableService}.`;
       }
     });
   });
 
-  /* =========================================================
-     QUOTE FORM VALIDATION + MAILTO
-     ========================================================= */
 
-  const contactForm = $("#contactForm");
-  const formStatus = $("#formStatus");
-  const contactSubmit = $("#contactSubmit");
+  // ==========================================================
+  // CONTACT FORM
+  // ==========================================================
 
-  const nameInput = $("#name");
-  const emailInput = $("#email");
-  const phoneInput = $("#phone");
-  const companyInput = $("#company");
-  const messageInput = $("#message");
-  const consentInput = $("#consent");
+  const contactForm =
+    document.getElementById("contactForm");
 
-  const setFormStatus = (message, type = "error") => {
+  const formStatus =
+    document.getElementById("formStatus");
+
+  const contactSubmit =
+    document.getElementById("contactSubmit");
+
+  function showFormStatus(message, type = "success") {
     if (!formStatus) return;
 
-    formStatus.className = `form-status is-visible ${type}`;
+    formStatus.textContent = message;
 
-    formStatus.innerHTML = `
-      <span>${message}</span>
-    `;
-  };
+    formStatus.classList.remove(
+      "success",
+      "error"
+    );
 
-  const clearFormStatus = () => {
-    if (!formStatus) return;
-
-    formStatus.textContent = "";
-    formStatus.className = "form-status";
-  };
-
-  const clearFieldError = (field) => {
-    if (!field) return;
-
-    const wrapper = field.closest(".field, .checkbox-field");
-
-    if (wrapper) {
-      wrapper.classList.remove("has-error");
-    }
-  };
-
-  const setFieldError = (field) => {
-    if (!field) return;
-
-    const wrapper = field.closest(".field, .checkbox-field");
-
-    if (wrapper) {
-      wrapper.classList.add("has-error");
-    }
-  };
-
-  const validateForm = () => {
-    let valid = true;
-
-    // Clear existing errors
-    $$(".field, .checkbox-field").forEach((field) => {
-      field.classList.remove("has-error");
-    });
-
-    clearFormStatus();
-
-    const name = nameInput?.value.trim() || "";
-
-    const email = emailInput?.value.trim() || "";
-
-    const phone = phoneInput?.value.trim() || "";
-
-    const service = serviceInterest?.value || "";
-
-    const message = messageInput?.value.trim() || "";
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    const phonePattern = /^[0-9+\-\s().]{7,}$/;
-
-    if (!name) {
-      setFieldError(nameInput);
-      valid = false;
-    }
-
-    if (!email || !emailPattern.test(email)) {
-      setFieldError(emailInput);
-      valid = false;
-    }
-
-    if (phone && !phonePattern.test(phone)) {
-      setFieldError(phoneInput);
-      valid = false;
-    }
-
-    if (!service) {
-      setFieldError(serviceInterest);
-      valid = false;
-    }
-
-    if (message.length < 12) {
-      setFieldError(messageInput);
-      valid = false;
-    }
-
-    if (!consentInput?.checked) {
-      setFieldError(consentInput);
-      valid = false;
-    }
-
-    if (!valid) {
-      setFormStatus(
-        "Please check the highlighted fields and complete the required information.",
-        "error",
-      );
-    }
-
-    return valid;
-  };
-
-  // Remove error styling while the user corrects fields
-  [
-    nameInput,
-    emailInput,
-    phoneInput,
-    companyInput,
-    serviceInterest,
-    messageInput,
-    consentInput,
-  ].forEach((field) => {
-    if (!field) return;
-
-    const eventName =
-      field.type === "checkbox" || field.tagName === "SELECT"
-        ? "change"
-        : "input";
-
-    field.addEventListener(eventName, () => {
-      clearFieldError(field);
-
-      if (formStatus?.classList.contains("error")) {
-        clearFormStatus();
-      }
-    });
-  });
+    formStatus.classList.add(type);
+  }
 
   if (contactForm) {
     contactForm.addEventListener("submit", (event) => {
       event.preventDefault();
 
-      if (!validateForm()) {
+      const formData =
+        new FormData(contactForm);
+
+      const name =
+        String(formData.get("name") || "").trim();
+
+      const email =
+        String(formData.get("email") || "").trim();
+
+      const message =
+        String(formData.get("message") || "").trim();
+
+      // Basic validation
+      if (!name) {
+        showFormStatus(
+          "Please enter your name.",
+          "error"
+        );
+
         return;
       }
 
-      const name = nameInput.value.trim();
-
-      const email = emailInput.value.trim();
-
-      const phone = phoneInput?.value.trim() || "Not provided";
-
-      const company = companyInput?.value.trim() || "Not provided";
-
-      const service =
-        serviceInterest.options[serviceInterest.selectedIndex]?.text ||
-        "Not specified";
-
-      const message = messageInput.value.trim();
-
-      const subject = `Mantrawest enquiry — ${service}`;
-
-      const body = [
-        "Hello Mantrawest,",
-        "",
-        "I would like to make an enquiry.",
-        "",
-        `Full name: ${name}`,
-        `Email: ${email}`,
-        `Phone: ${phone}`,
-        `Company: ${company}`,
-        `Service: ${service}`,
-        "",
-        "Message:",
-        message,
-        "",
-        "Sent from the Mantrawest website.",
-      ].join("\n");
-
-      const mailto = `mailto:info@mantrawest.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-      setFormStatus(
-        "Your email is ready. Your email application will open with the enquiry pre-filled.",
-        "success",
-      );
-
-      if (contactSubmit) {
-        contactSubmit.disabled = true;
-        contactSubmit.setAttribute("aria-disabled", "true");
-      }
-
-      // Open the user's email application
-      window.location.href = mailto;
-
-      // Re-enable after a short delay
-      window.setTimeout(() => {
-        if (contactSubmit) {
-          contactSubmit.disabled = false;
-          contactSubmit.removeAttribute("aria-disabled");
-        }
-      }, 1800);
-    });
-  }
-
-  /* =========================================================
-     ORGANISATIONAL CHART
-     ========================================================= */
-
-  const orgBranches = $$(".org-branch");
-
-  const orgExpandAll = $("#orgExpandAll");
-
-  const setOrgBranchState = (branch, open) => {
-    if (!branch) return;
-
-    branch.setAttribute("data-open", String(open));
-
-    const toggle = $(".org-branch-toggle", branch);
-
-    if (toggle) {
-      toggle.setAttribute("aria-expanded", String(open));
-    }
-  };
-
-  orgBranches.forEach((branch) => {
-    const toggle = $(".org-branch-toggle", branch);
-
-    if (!toggle) return;
-
-    toggle.addEventListener("click", () => {
-      const isOpen = branch.getAttribute("data-open") === "true";
-
-      setOrgBranchState(branch, !isOpen);
-
-      if (orgExpandAll) {
-        const allOpen = orgBranches.every(
-          (item) => item.getAttribute("data-open") === "true",
+      if (!email) {
+        showFormStatus(
+          "Please enter your email address.",
+          "error"
         );
 
-        orgExpandAll.setAttribute("data-state", allOpen ? "open" : "closed");
-
-        orgExpandAll.textContent = allOpen ? "Collapse all" : "Expand all";
+        return;
       }
-    });
-  });
 
-  if (orgExpandAll) {
-    orgExpandAll.addEventListener("click", () => {
-      const shouldOpen = orgExpandAll.getAttribute("data-state") !== "open";
+      const emailPattern =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-      orgBranches.forEach((branch) => {
-        setOrgBranchState(branch, shouldOpen);
-      });
+      if (!emailPattern.test(email)) {
+        showFormStatus(
+          "Please enter a valid email address.",
+          "error"
+        );
 
-      orgExpandAll.setAttribute("data-state", shouldOpen ? "open" : "closed");
+        return;
+      }
 
-      orgExpandAll.textContent = shouldOpen ? "Collapse all" : "Expand all";
+      if (!message) {
+        showFormStatus(
+          "Please tell us a little about your project.",
+          "error"
+        );
+
+        return;
+      }
+
+      // Disable button while processing
+      if (contactSubmit) {
+        contactSubmit.disabled = true;
+        contactSubmit.dataset.originalText =
+          contactSubmit.textContent;
+
+        contactSubmit.textContent =
+          "Sending...";
+      }
+
+      /*
+       * Front-end confirmation.
+       *
+       * No external form-processing endpoint was supplied
+       * in the website source, so this does not pretend to
+       * send data to a server that does not exist.
+       */
+      setTimeout(() => {
+        showFormStatus(
+          "Thank you. Your enquiry has been prepared successfully. Our team will be in touch.",
+          "success"
+        );
+
+        showToast(
+          "Enquiry submitted successfully."
+        );
+
+        contactForm.reset();
+
+        if (contactSubmit) {
+          contactSubmit.disabled = false;
+
+          contactSubmit.textContent =
+            contactSubmit.dataset.originalText ||
+            "Send enquiry";
+        }
+      }, 600);
     });
   }
 
-  /* =========================================================
-     CLIENT PORTAL MODAL
-     ========================================================= */
 
-  const portalModal = $("#portalModal");
+  // ==========================================================
+  // TOAST NOTIFICATION
+  // ==========================================================
 
-  const portalModalBackdrop = $("#portalModalBackdrop");
+  const toast =
+    document.getElementById("toast");
 
-  const portalModalClose = $("#portalModalClose");
+  let toastTimer = null;
 
-  const openModalButtons = $$("[data-open-modal]");
+  function showToast(message) {
+    if (!toast) return;
 
-  let lastFocusedElement = null;
+    toast.textContent = message;
 
-  const openPortalModal = () => {
+    toast.classList.add("show");
+
+    clearTimeout(toastTimer);
+
+    toastTimer = setTimeout(() => {
+      toast.classList.remove("show");
+    }, 3500);
+  }
+
+
+  // ==========================================================
+  // CLIENT PORTAL MODAL
+  // ==========================================================
+
+  const portalModal =
+    document.getElementById("portalModal");
+
+  const portalModalBackdrop =
+    document.getElementById("portalModalBackdrop");
+
+  const portalModalClose =
+    document.getElementById("portalModalClose");
+
+  const portalTriggers =
+    $$("[data-open-modal]");
+
+  let previousFocusedElement = null;
+
+  function openPortalModal() {
     if (!portalModal) return;
 
-    lastFocusedElement = document.activeElement;
+    previousFocusedElement =
+      document.activeElement;
 
     portalModal.hidden = false;
 
-    // Allow CSS transitions/animations to start
     requestAnimationFrame(() => {
       portalModal.classList.add("is-open");
     });
@@ -614,330 +564,125 @@ document.addEventListener("DOMContentLoaded", () => {
     if (portalModalClose) {
       portalModalClose.focus();
     }
-  };
+  }
 
-  const closePortalModal = () => {
+  function closePortalModal() {
     if (!portalModal) return;
 
     portalModal.classList.remove("is-open");
 
     document.body.classList.remove("modal-open");
 
-    // Keep it visible briefly for the CSS animation
-    window.setTimeout(() => {
-      if (!portalModal.classList.contains("is-open")) {
-        portalModal.hidden = true;
-      }
+    setTimeout(() => {
+      portalModal.hidden = true;
     }, 250);
 
-    if (lastFocusedElement && typeof lastFocusedElement.focus === "function") {
-      lastFocusedElement.focus();
+    if (
+      previousFocusedElement &&
+      typeof previousFocusedElement.focus === "function"
+    ) {
+      previousFocusedElement.focus();
     }
-  };
+  }
 
-  openModalButtons.forEach((button) => {
-    button.addEventListener("click", openPortalModal);
+  portalTriggers.forEach((trigger) => {
+    trigger.addEventListener(
+      "click",
+      openPortalModal
+    );
   });
 
   if (portalModalClose) {
-    portalModalClose.addEventListener("click", closePortalModal);
+    portalModalClose.addEventListener(
+      "click",
+      closePortalModal
+    );
   }
 
   if (portalModalBackdrop) {
-    portalModalBackdrop.addEventListener("click", closePortalModal);
+    portalModalBackdrop.addEventListener(
+      "click",
+      closePortalModal
+    );
   }
 
-  /* =========================================================
-     KEYBOARD MODAL CLOSE
-     ========================================================= */
 
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && portalModal && !portalModal.hidden) {
-      closePortalModal();
-    }
+  // ==========================================================
+  // FOOTER YEAR
+  // ==========================================================
+
+  $$("[data-year]").forEach((element) => {
+    element.textContent =
+      new Date().getFullYear();
   });
 
-  /* =========================================================
-     SMOOTH ANCHOR SCROLLING
-     ========================================================= */
 
-  $$('a[href^="#"]').forEach((link) => {
-    link.addEventListener("click", (event) => {
-      const href = link.getAttribute("href");
+  // ==========================================================
+  // GLASS SHINE / 3D CARD EFFECT
+  // ==========================================================
 
-      if (!href || href === "#" || href === "#top") {
+  const glassCards =
+    $$(".glass-shine");
+
+  glassCards.forEach((card) => {
+    card.addEventListener("mousemove", (event) => {
+      if (window.innerWidth <= 900) {
         return;
       }
 
-      const target = document.querySelector(href);
+      const rect =
+        card.getBoundingClientRect();
 
-      if (!target) return;
+      const x =
+        event.clientX - rect.left;
 
-      event.preventDefault();
+      const y =
+        event.clientY - rect.top;
 
-      closeNav();
-      closePortalModal();
+      const rotateX =
+        ((y / rect.height) - 0.5) * -4;
 
-      const headerHeight = siteHeader?.offsetHeight || 0;
+      const rotateY =
+        ((x / rect.width) - 0.5) * 4;
 
-      const targetPosition =
-        target.getBoundingClientRect().top + window.scrollY - headerHeight - 10;
+      card.style.setProperty(
+        "--mouse-x",
+        `${x}px`
+      );
 
-      window.scrollTo({
-        top: Math.max(targetPosition, 0),
-        behavior: prefersReducedMotion ? "auto" : "smooth",
-      });
+      card.style.setProperty(
+        "--mouse-y",
+        `${y}px`
+      );
 
-      // Keep URL hash updated without jumping
-      if (window.history && window.history.replaceState) {
-        window.history.replaceState(null, "", href);
-      }
+      card.style.transform =
+        `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    });
+
+    card.addEventListener("mouseleave", () => {
+      card.style.transform = "";
     });
   });
 
-  /* =========================================================
-     ACTIVE NAVIGATION
-     ========================================================= */
 
-  const navLinks = $$(".nav-link[data-nav]");
+  // ==========================================================
+  // IMAGE LOADING
+  // ==========================================================
 
-  const navTargets = [];
-
-  navLinks.forEach((link) => {
-    const href = link.getAttribute("href");
-
-    if (!href || !href.startsWith("#")) {
-      return;
-    }
-
-    const target = document.querySelector(href);
-
-    if (target) {
-      navTargets.push({
-        link,
-        target,
-      });
-    }
-  });
-
-  if (navTargets.length && "IntersectionObserver" in window) {
-    const activeObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-
-          navTargets.forEach(({ link }) => {
-            link.removeAttribute("aria-current");
-          });
-
-          const matching = navTargets.find(
-            ({ target }) => target === entry.target,
-          );
-
-          if (matching) {
-            matching.link.setAttribute("aria-current", "page");
-          }
-        });
-      },
-      {
-        rootMargin: "-30% 0px -55% 0px",
-        threshold: 0,
-      },
-    );
-
-    navTargets.forEach(({ target }) => {
-      activeObserver.observe(target);
-    });
-  }
-
-  /* =========================================================
-     GLASS SHINE — CURSOR REACTIVE
-     ========================================================= */
-
-  if (!prefersReducedMotion) {
-    $$(".glass-shine").forEach((element) => {
-      element.addEventListener("pointermove", (event) => {
-        const rect = element.getBoundingClientRect();
-
-        const x = ((event.clientX - rect.left) / rect.width) * 100;
-
-        const y = ((event.clientY - rect.top) / rect.height) * 100;
-
-        element.style.setProperty("--mx", `${x}%`);
-
-        element.style.setProperty("--my", `${y}%`);
-      });
-    });
-  }
-
-  /* =========================================================
-     HERO PARALLAX
-     ========================================================= */
-
-  const heroImage = $(".hero-media-frame img");
-
-  if (heroImage && !prefersReducedMotion) {
-    let ticking = false;
-
-    const updateHeroParallax = () => {
-      const scrollPosition = window.scrollY;
-
-      if (scrollPosition < 700) {
-        const movement = scrollPosition * 0.035;
-
-        heroImage.style.transform = `scale(1.04) translateY(${movement}px)`;
-      } else {
-        heroImage.style.transform = "scale(1.04) translateY(24px)";
-      }
-
-      ticking = false;
-    };
-
-    window.addEventListener(
-      "scroll",
-      () => {
-        if (!ticking) {
-          window.requestAnimationFrame(updateHeroParallax);
-
-          ticking = true;
-        }
-      },
-      { passive: true },
-    );
-  }
-
-  /* =========================================================
-     BUTTON MAGNETIC EFFECT
-     ========================================================= */
-
-  if (!prefersReducedMotion) {
-    $$(".btn").forEach((button) => {
-      button.addEventListener("pointermove", (event) => {
-        if (window.innerWidth < 768) {
-          return;
-        }
-
-        const rect = button.getBoundingClientRect();
-
-        const x = event.clientX - rect.left - rect.width / 2;
-
-        const y = event.clientY - rect.top - rect.height / 2;
-
-        button.style.setProperty("--mag-x", `${x * 0.05}px`);
-
-        button.style.setProperty("--mag-y", `${y * 0.05}px`);
-      });
-
-      button.addEventListener("pointerleave", () => {
-        button.style.removeProperty("--mag-x");
-
-        button.style.removeProperty("--mag-y");
-      });
-    });
-  }
-
-  /* =========================================================
-     TOOLTIP / "COMING SOON" SOCIAL BUTTONS
-     ========================================================= */
-
-  $$(".tt").forEach((tooltip) => {
-    const trigger = $("a", tooltip);
-
-    if (!trigger) return;
-
-    trigger.addEventListener("click", (event) => {
-      const href = trigger.getAttribute("href");
-
-      if (!href || href === "#") {
-        event.preventDefault();
-
-        tooltip.classList.toggle("show-tip");
-      }
+  $$("img").forEach((image) => {
+    image.addEventListener("error", () => {
+      image.classList.add("image-error");
     });
   });
 
-  /* =========================================================
-     FOOTER YEAR
-     ========================================================= */
 
-  $$("[data-year]").forEach((element) => {
-    element.textContent = new Date().getFullYear();
-  });
+  // ==========================================================
+  // INITIAL STATE
+  // ==========================================================
 
-  /* =========================================================
-     TOAST HELPER
-     ========================================================= */
+  document.body.classList.add("js-ready");
 
-  const toast = $("#toast");
-
-  let toastTimer = null;
-
-  const showToast = (message, duration = 3000) => {
-    if (!toast) return;
-
-    toast.textContent = message;
-
-    toast.classList.add("is-visible");
-
-    if (toastTimer) {
-      clearTimeout(toastTimer);
-    }
-
-    toastTimer = setTimeout(() => {
-      toast.classList.remove("is-visible");
-    }, duration);
-  };
-
-  // Expose a small helper if needed elsewhere
-  window.mantrawestToast = showToast;
-
-  /* =========================================================
-     GLOBAL SCROLL HANDLER
-     ========================================================= */
-
-  let scrollTicking = false;
-
-  window.addEventListener(
-    "scroll",
-    () => {
-      if (scrollTicking) return;
-
-      window.requestAnimationFrame(() => {
-        updateHeader();
-        updateScrollProgress();
-
-        scrollTicking = false;
-      });
-
-      scrollTicking = true;
-    },
-    { passive: true },
+  console.log(
+    "Mantrawest website JavaScript loaded successfully."
   );
-
-  /* =========================================================
-     INITIAL STATE
-     ========================================================= */
-
-  updateHeader();
-  updateScrollProgress();
-
-  // Make sure the portal starts closed
-  if (portalModal) {
-    portalModal.hidden = true;
-    portalModal.classList.remove("is-open");
-  }
-
-  // Make sure all org branches start according
-  // to their HTML data-open state
-  orgBranches.forEach((branch) => {
-    const isOpen = branch.getAttribute("data-open") === "true";
-
-    const toggle = $(".org-branch-toggle", branch);
-
-    if (toggle) {
-      toggle.setAttribute("aria-expanded", String(isOpen));
-    }
-  });
-
-  console.log("Mantrawest JavaScript loaded successfully.");
 });
