@@ -47,6 +47,71 @@
     />
 
     <link rel="stylesheet" href="style.css" />
+
+  <!-- Keep Client Login styled and animated like Get a Quote. -->
+  <style>
+    .header-actions .nav-portal-link {
+      position: relative;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 16px;
+      border: 0;
+      border-radius: 999px;
+      background: linear-gradient(155deg, #ffc868, var(--amber) 45%, var(--amber-600));
+      color: var(--abyss);
+      font: inherit;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+      box-shadow: 0 12px 26px -8px rgba(245, 165, 36, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        inset 0 -3px 8px rgba(32, 20, 10, 0.14);
+      transition: transform 0.5s var(--spring),
+        box-shadow 0.45s var(--spring), background 0.3s ease;
+    }
+
+    .header-actions .nav-portal-link::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(
+        115deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.5) 48%,
+        transparent 66%
+      );
+      transform: translateX(-130%) skewX(-12deg);
+      transition: transform 0.7s ease;
+    }
+
+    .header-actions .nav-portal-link:hover::before {
+      transform: translateX(130%) skewX(-12deg);
+    }
+
+    .header-actions .nav-portal-link:hover {
+      transform: translateY(-4px) scale(1.045);
+      border-color: transparent;
+      background: linear-gradient(155deg, #ffc868, var(--amber) 45%, var(--amber-600));
+      color: var(--abyss);
+      box-shadow: 0 22px 36px -10px rgba(245, 165, 36, 0.65),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        inset 0 -3px 8px rgba(32, 20, 10, 0.12);
+    }
+
+    .header-actions .nav-portal-link:active {
+      transform: translateY(-1px) scale(0.95);
+      transition-duration: 0.18s;
+    }
+
+    .header-actions .nav-portal-link:focus-visible {
+      outline: 2px solid var(--teal);
+      outline-offset: 3px;
+    }
+  </style>
   </head>
 
   <body>
@@ -125,7 +190,7 @@
 
           <button
             type="button"
-            class="nav-portal-link"
+            class="btn btn-amber nav-portal-link"
             data-open-modal
             aria-label="Open Client Login"
           >
